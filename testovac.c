@@ -4,10 +4,6 @@
 #include <pthread.h>
 
 
-struct sArgs {
-	char 
-};
-
 
 void printStats() {
 	printf("stats\n");
@@ -30,6 +26,7 @@ void sendMsg() {
 
 void *msgClock(void *arg)
 {
+	int nOfNodes = 0;
 	int i = *((int *) arg);
 	printf("%d\n", i);
 	while(1)
@@ -75,7 +72,7 @@ int main(int argc, char** argv) {
 	}
 	*argI = aI;
 	pthread_t mClockTID;
-	pthread_create(&mClockTID, NULL, &msgClock, arg);
+	pthread_create(&mClockTID, NULL, &msgClock, argI);
 
 	sleep(1000);
 
