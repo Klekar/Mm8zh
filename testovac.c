@@ -4,8 +4,11 @@
 #include <pthread.h>
 #include <sys/wait.h> // wati()
 
+int nOfNodes;
 
-
+void printHelp() {
+	printf("Nápověda.");
+}
 
 void printStats() {
 	printf("stats\n");
@@ -22,13 +25,14 @@ void *printClock(void *arg)
 	return 0;
 }
 
-void sendMsg() {
-
+void getRtt(int i) {
+	extern char nodes[];
+	printf("%s\n", nodes[i]);
+	//getaddrinfo(desiredAdd, "33434", &hints, &servinfo);
 }
 
 void *msgClock(void *arg)
 {
-	int nOfNodes = 1; ///////////////////////////////////////////////////////////// počet uzlů
 	int i = *((int *) arg);
 	while(1)
 	{
@@ -38,7 +42,7 @@ void *msgClock(void *arg)
 			pid_t pid;
 			pid = fork();
 			if (pid == 0) { // child proces
-				sendMsg();
+				getRtt(i);
 				printf("child process %d\n", i);
 				_Exit(0);
 			} else { // parent proces
@@ -57,6 +61,34 @@ void *msgClock(void *arg)
  * testovac [-h] [-u] [-t <interval>] [-i <interval>] [-p <port>] [-l <port>] [-s <size>] [-r <value>] <uzel1> <uzel2> <uzel3> ...
  */
 int main(int argc, char** argv) {
+	//char* node = "google.com";
+
+	while ((c = getopt (argc, argv, "hut:i:p:l:s:r:")) != -1) {
+		argsUsed++;
+		switch(c){
+			case 'h':
+				printHelp();
+				exit(0);
+			case 'm':
+				mttl = atoi(optarg);
+				break;
+			case '?':
+				fprintf(stderr, "Špatné argumenty.\n");
+				break;
+			default:
+				fprintf(stderr, "Špatné argumenty.\n");
+				break;
+		}
+	}
+	nOfNodes = argc - optind; // number of entered nodes
+	char nodes[nOfNodes];
+	printf("nOfNodes: %d\n", nOfNodes);
+
+	for (int i = 0; i + optind < argc; i++) { //copy entered nodes to "nodes" array
+		nodes[i] = argv[i + optind];
+	}
+
+
 	int aT = 10; // argument -t print stat interval (300)
 	int aI = 1000; // argument -i msg send interval (100)
 
