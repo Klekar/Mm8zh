@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <unistd.h>
 #include <pthread.h>
 
@@ -10,7 +11,7 @@ void printStats() {
 
 void *statClock(void *arg)
 {
-	int t = *((int *) i);
+	int t = *((int *) arg);
 	while(1)
 	{
 		sleep(t++);
