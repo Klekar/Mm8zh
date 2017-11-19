@@ -8,11 +8,11 @@ void printStats() {
 }
 
 
-void *statClock(void *arg)
+void *statClock(int t /*void *arg*/)
 {
     while(1)
     {
-        sleep(10);
+        sleep(t);
         printStats();
     }
     return 0;
@@ -26,7 +26,7 @@ int main(int argc, char** argv) {
 	printf("program zacal");
 	pthread_t tid;
 	printf("program init");
-	pthread_create(&tid, NULL, &statClock, NULL);
+	pthread_create(&tid, NULL, &statClock, 1);
 	printf("program vytvoril thread");
 	sleep(1000);
     /*pid_t pid;
