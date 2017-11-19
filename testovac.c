@@ -25,6 +25,7 @@ void *statClock(void *arg)
 int main(int argc, char** argv) {
 	pthread_t tid;
 	pthread_create(&tid, NULL, &statClock, NULL);
+	sleep(1000);
     /*pid_t pid;
     pid = fork();
     if (pid == 0) {
