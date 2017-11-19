@@ -47,7 +47,7 @@ void *msgClock(void *arg)
 			}
 		}
 		for (int i = 0; i < nOfNodes; i++) {
-			wait(pids[i]);
+			wait();
 		}
 	}
 	return 0;
