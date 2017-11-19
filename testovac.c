@@ -44,6 +44,9 @@ void *msgClock(void *arg)
 				printf("parent process %d\n", i);
 			}
 		}
+		for (int i = 0; i < nOfNodes; i++) {
+			wait(pids[i]);
+		}
 	}
 	return 0;
 }
