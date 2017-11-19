@@ -63,7 +63,7 @@ int main(int argc, char** argv) {
 	}
 	*argT = aT;
 	pthread_t printTID;
-	pthread_create(&printTID, NULL, &printClock, arg);
+	pthread_create(&printTID, NULL, &printClock, argT);
 
 	int *argI = malloc(sizeof(*argI));
 	if ( argI == NULL ) {
