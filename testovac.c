@@ -4,6 +4,18 @@
 #include <pthread.h>
 #include <sys/wait.h> // wati()
 
+
+#include <string.h>
+#include <arpa/inet.h>
+#include <sys/time.h>
+#include <linux/errqueue.h>
+#include <linux/icmp.h>
+#include <netinet/icmp6.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netdb.h>
+
+
 int nOfNodes;
 char* nodes[30];
 
@@ -20,15 +32,22 @@ void *printClock(void *arg) {
 	while(1)
 	{
 		sleep(t);
-		//printStats();
+		printStats();
 	}
 	return 0;
 }
 
 void getRtt(int i) {
-	//extern char* nodes[];
 	printf("%s\n", nodes[i]);
-	//getaddrinfo(desiredAdd, "33434", &hints, &servinfo);
+
+	struct addrinfo hints, *servinfo;
+
+    memset(&hints, 0, sizeof hints);
+    hints.ai_family = AF_UNSPEC;
+    hints.ai_socktype = SOCK_DGRAM;
+
+
+	getaddrinfo(nodes[i], "33434", &hints, &servinfo);
 }
 
 void *msgClock(void *arg) {
@@ -41,15 +60,15 @@ void *msgClock(void *arg) {
 		pid_t pids[nOfNodes];
 		for (int i = 0; i < nOfNodes; i++) {
 			pid_t pid;
-			printf("probehne fork\n");
+			//printf("probehne fork\n");
 			pid = fork();
 			if (pid == 0) { // child proces
-				printf("child process %d\n", i);
+				//printf("child process %d\n", i);
 				getRtt(i);
 				_Exit(0);
 			} else { // parent proces
 				pids[i] = pid;
-				printf("parent process %d\n", i);
+				//printf("parent process %d\n", i);
 			}
 		}
 		for (int i = 0; i < nOfNodes; i++) {
