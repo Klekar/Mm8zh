@@ -24,6 +24,7 @@ void *msgClock(void *arg)
 {
 	sleep(10);
 	int i = *((int *) arg);
+	printf("%d\n", i);
 	while(1)
 	{
 		usleep(i * 1000);
