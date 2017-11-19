@@ -1,18 +1,29 @@
-GCC=gcc
-CFLAGS+=-Wall -g
-CFLAGS+=-DUSE_SLEEP
-LIBS=-lpcap
-SRC=$(wildcard *.c)
-PROGS=$(patsubst %.c,%,$(SRC))
-#OBJS = $(SRC:.c=.o)
 
-%: %.c
-	$(GCC) $(CFLAGS+) $< $(LIBS) -o $@ 
+NAME = testovac
+EXEC = $(NAME)
+sources = $(NAME).c
 
-all: $(PROGS)
+CXX = gcc
+RM = rm -f
 
-clean:	
-	rm -f *.core $(PROGS) *~
+CFLAGS = -std=gnu99 -Wall -Wextra -Werror -pedantic
+LDFLAGS = -lrt -pthread
 
+OBJFILES = $(sources:.c=.o)
 
+.PHONY : all
 
+all : $(EXEC) 
+
+%.o : %.c 
+	clear
+	$(CXX) $(CFLAGS) -c $< -o $@
+
+$(EXEC) : $(OBJFILES)
+	$(CXX) $(CFLAGS) -o $@ $(OBJFILES) $(LDFLAGS)
+
+clean:
+	$(RM) *.o core *.out
+
+cleanall: clean
+	$(RM) $(EXEC)
