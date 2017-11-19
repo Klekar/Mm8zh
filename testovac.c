@@ -38,7 +38,7 @@ void *msgClock(void *arg)
 			if (pid == 0) { // child proces
 				sendMsg();
 				printf("child process %d\n", i);
-				exit(0);
+				_Exit(0);
 			} else { // parent proces
 				pids[i] = pid;
 				printf("parent process %d\n", i);
