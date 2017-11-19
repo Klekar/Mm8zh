@@ -5,6 +5,7 @@
 #include <sys/wait.h> // wati()
 
 int nOfNodes;
+char* nodes[30];
 
 void printHelp() {
 	printf("Nápověda.");
@@ -14,8 +15,7 @@ void printStats() {
 	printf("stats\n");
 }
 
-void *printClock(void *arg)
-{
+void *printClock(void *arg) {
 	int t = *((int *) arg);
 	while(1)
 	{
@@ -26,13 +26,12 @@ void *printClock(void *arg)
 }
 
 void getRtt(int i) {
-	extern char* nodes[];
+	//extern char* nodes[];
 	printf("%s\n", nodes[i]);
 	//getaddrinfo(desiredAdd, "33434", &hints, &servinfo);
 }
 
-void *msgClock(void *arg)
-{
+void *msgClock(void *arg) {
 	int i = *((int *) arg);
 	while(1)
 	{
@@ -74,7 +73,7 @@ int main(int argc, char** argv) {
 		}
 	}
 	nOfNodes = argc - optind; // number of entered nodes
-	char* nodes[nOfNodes];
+	//char* nodes[nOfNodes];
 	printf("nOfNodes: %d\n", nOfNodes);
 
 	for (int i = 0; i + optind < argc; i++) { //copy entered nodes to "nodes" array
