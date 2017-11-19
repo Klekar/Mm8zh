@@ -64,7 +64,6 @@ int main(int argc, char** argv) {
 	//char* node = "google.com";
 	char c;
 	while ((c = getopt (argc, argv, "hut:i:p:l:s:r:")) != -1) {
-		argsUsed++;
 		switch(c){
 			case 'h':
 				printHelp();
