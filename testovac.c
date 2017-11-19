@@ -26,9 +26,8 @@ void sendMsg() {
 
 void *msgClock(void *arg)
 {
-	int nOfNodes = 0;
+	int nOfNodes = 1; ///////////////////////////////////////////////////////////// počet uzlů
 	int i = *((int *) arg);
-	printf("%d\n", i);
 	while(1)
 	{
 		usleep(i * 1000);
