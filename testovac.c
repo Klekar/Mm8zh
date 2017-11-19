@@ -4,10 +4,14 @@
 #include <pthread.h>
 
 
+struct sArgs {
+	char 
+};
+
+
 void printStats() {
 	printf("stats\n");
 }
-
 
 void *printClock(void *arg)
 {
@@ -20,15 +24,30 @@ void *printClock(void *arg)
 	return 0;
 }
 
+void sendMsg() {
+
+}
+
 void *msgClock(void *arg)
 {
-	sleep(10);
 	int i = *((int *) arg);
 	printf("%d\n", i);
 	while(1)
 	{
 		usleep(i * 1000);
-		printStats();
+		pid_t pids[nOfNodes];
+		for (int i = 0; i < nOfNodes; i++) {
+			pid_t pid;
+			pid = fork();
+			if (pid == 0) { // child proces
+				sendMsg();
+				printf("child process %d\n", i);
+				exit(0);
+			} else { // parent proces
+				pids[i] = pid;
+				printf("parent process %d\n", i);
+			}
+		}
 	}
 	return 0;
 }
@@ -40,28 +59,32 @@ int main(int argc, char** argv) {
 	int aT = 10; // argument -t print stat interval (300)
 	int aI = 1000; // argument -i msg send interval (100)
 
-	int *arg = malloc(sizeof(*arg));
-	if ( arg == NULL ) {
+	int *argT = malloc(sizeof(*argT));
+	if ( argT == NULL ) {
 		fprintf(stderr, "Couldn't allocate memory for thread arg.\n");
 		exit(99);
 	}
-	*arg = aT;
+	*argT = aT;
 	pthread_t printTID;
 	pthread_create(&printTID, NULL, &printClock, arg);
 
-	*arg = aI;
-	pthread_t msgTID;
-	pthread_create(&msgTID, NULL, &msgClock, arg);
-	*arg = 13;
+	int *argI = malloc(sizeof(*argI));
+	if ( argI == NULL ) {
+		fprintf(stderr, "Couldn't allocate memory for thread arg.\n");
+		exit(99);
+	}
+	*argI = aI;
+	pthread_t mClockTID;
+	pthread_create(&mClockTID, NULL, &msgClock, arg);
 
 	sleep(1000);
 
 	/*pid_t pid;
-    pid = fork();
-    if (pid == 0) {
-        printf("child process");
-    } else {
-        sleep(15);
-        printf("parent process");
-    }*/
+	pid = fork();
+	if (pid == 0) {
+		printf("child process");
+	} else {
+		sleep(15);
+		printf("parent process");
+	}*/
 }
