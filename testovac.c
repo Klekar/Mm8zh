@@ -10,7 +10,7 @@ void printStats() {
 
 void *statClock(void *arg)
 {
-	int t = *((itn *) i);
+	int t = *((int *) i);
 	while(1)
 	{
 		sleep(t++);
