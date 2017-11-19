@@ -39,10 +39,11 @@ void *msgClock(void *arg) {
 		pid_t pids[nOfNodes];
 		for (int i = 0; i < nOfNodes; i++) {
 			pid_t pid;
+			printf("probehne fork\n");
 			pid = fork();
 			if (pid == 0) { // child proces
-				getRtt(i);
 				printf("child process %d\n", i);
+				getRtt(i);
 				_Exit(0);
 			} else { // parent proces
 				pids[i] = pid;
