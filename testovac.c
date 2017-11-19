@@ -22,7 +22,7 @@ void *printClock(void *arg)
 
 void *msgClock(void *arg)
 {
-	sleep(10)
+	sleep(10);
 	int i = *((int *) arg);
 	while(1)
 	{
