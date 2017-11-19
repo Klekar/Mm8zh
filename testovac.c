@@ -20,7 +20,7 @@ void *printClock(void *arg) {
 	while(1)
 	{
 		sleep(t);
-		printStats();
+		//printStats();
 	}
 	return 0;
 }
@@ -32,6 +32,8 @@ void getRtt(int i) {
 }
 
 void *msgClock(void *arg) {
+	printf("msgClock  start\n");
+	printStats();
 	int i = *((int *) arg);
 	while(1)
 	{
