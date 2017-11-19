@@ -8,11 +8,11 @@ void printStats() {
 }
 
 
-void *statClock(int t /*void *arg*/)
+void *statClock(void *arg)
 {
     while(1)
     {
-        sleep(t);
+        sleep(arg[0]);
         printStats();
     }
     return 0;
