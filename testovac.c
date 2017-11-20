@@ -22,12 +22,27 @@
 
 
 int useUdp = 0;
+int wSec = 2; // arg -w
 char udpSendPort[6] = "33434";
 //char udpRcvPort[6] = "33434";
 int udpRcvPort = -1;
 int nOfNodes;
 char* nodes[30];
 int bytesOfData = 56;
+
+/**
+ * function used for getting time difference in ms beween base and min
+ * @param min
+ * @param base
+ * @return double base - min [ms]
+ */
+double subTimeval(struct timeval *min, struct timeval *base) {
+    double sub;
+
+    sub =   (double)(base->tv_sec - min->tv_sec) * 1000.0 +
+            (double)(base->tv_usec - min->tv_usec) / 1000.0;
+    return (sub);
+}
 
 void printHelp() {
 	printf("Nápověda.");
@@ -68,6 +83,13 @@ void udpGetRtt(int nodeI) {
 	if (sock == -1) {
 		fprintf(stderr, "Nepovedlo se vytvořit socket.\n");
 		exit(1);
+		}
+	struct timeval timOut; // initialize timeout
+	timOut.tv_sec = 2;
+	timOut.tv_usec = 0;
+	if (setsockopt(sockfd, SOL_SOCKET, SO_RCVTIMEO, (const char*)&timOut,sizeof(struct timeval)) < 0) {
+		printf("Nepodarilo se nastavit socket. (udp send)");
+		_Exit(1);
 	}
 
 	len = sizeof(server);
@@ -125,12 +147,21 @@ void udpGetRtt(int nodeI) {
 		fprintf(stderr, "recv() se nezdarilo\n");
 		exit(1);
 	} else if (ok > 0){
-		(void) gettimeofday(&t2, &tzone);
+		(void) gettimeofday(&t2, &tzone); //////////// KONEC MĚŘENÍ ČASU
 		// obtain the remote IP adddress and port from the server (cf. recfrom())
 		if (getpeername(sock, (struct sockaddr *) &from, &fromlen) != 0) {
-			fprintf(stderr, "recv() se nezdarilo\n");
+			fprintf(stderr, "getpeername() se nezdarilo\n");
 			exit(1);
-	}
+		}
+
+		time_t t = t2.tv_sec;
+		struct tm* lt = localtime(&nt);
+		char ts[26];
+
+		strftime(ts, 26, "%Y-%m-%d %H:%M:%S", nt);
+
+		printf("%s.%02d %d bytes from %s (ip addr) time=%.2f ms\n", ts, t2.tv_usec % 1000, bytesOfData, node[nodeI], subTimeval(&t1, &t2));
+
 
 		printf("data received from %s, port %d\n",inet_ntoa(from.sin_addr),ntohs(from.sin_port));
 		if (strcmp(buffer, buffer2)) {
