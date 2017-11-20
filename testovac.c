@@ -85,12 +85,7 @@ void udpGetRtt(int nodeI) {
 	/*char temp;
 	temp = &t1;*/
 
-	unsigned char buffer[bytesOfData];
-	//buffer = (char *) malloc(bytesOfData);
-	/*if (buffer == NULL) {
-		fprintf(stderr, "Nedostatek místa pro alokaci paměti bufferu. (send udp)\n");
-		exit(1);
-	}*/
+	/*unsigned char buffer[bytesOfData];	  posilani time v packetu
 	int timevalSize = sizeof(t1);
 	for ( int i = 0; i < timevalSize; i++) {
 		buffer[i] = (t1 >> ((timevalSize - 1)*8) ) & 0xFFFFFFFF;
@@ -100,9 +95,37 @@ void udpGetRtt(int nodeI) {
 		buffer[i] = rand() % 256;
 		//int r = (rand() % 256) + '0';
 		//printf("%c\n", buffer[i]);
+	}*/
+
+	int ok = send(sock, buffer, sizeof(buffer), 0);
+	if (ok == -1) {
+		fprintf(stderr, "Nepovedlo se odeslat data.\n");
+		exit(1);
+	} else if (ok != bytesOfData)
+		fprintf(stderr, "Data byla odeslana castecne.\n");
+
+	if (getsockname(sock, (struct sockaddr *) &from, &len) == -1) {
+		fprintf(stderr, "Nepovedlo se zjistit lokální adresu a port.\n");
+		exit(1);
 	}
 
-	send(sock, buffer, sizeof(buffer), 0);
+	printf("data sent from %s, port %d (%d) to %s, port %d (%d)\n",inet_ntoa(from.sin_addr), ntohs(from.sin_port), from.sin_port, inet_ntoa(server.sin_addr),ntohs(server.sin_port), server.sin_port);
+
+
+	if ((i = recv(sock,buffer, BUFFER,0)) == -1) {
+		fprintf(stderr, "recv() se nezdarilo\n");
+		exit(1);
+	} else if (i > 0){
+		(void) gettimeofday(&t2, &tzone);
+		// obtain the remote IP adddress and port from the server (cf. recfrom())
+		if (getpeername(sock, (struct sockaddr *) &from, &fromlen) != 0) {
+			fprintf(stderr, "recv() se nezdarilo\n");
+			exit(1);
+	}
+
+		printf("data received from %s, port %d\n",inet_ntoa(from.sin_addr),ntohs(from.sin_port));
+		printf("%.*s",i,buffer);				// print the answer
+	}
 
 	/*memset(&hints, 0, sizeof hints); ipv4 vs ipv6
 	hints.ai_family = AF_UNSPEC;
