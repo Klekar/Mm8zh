@@ -96,7 +96,7 @@ void udpGetRtt(int nodeI) {
 		printf("%c\n", buffer[i]);
 	}
 
-	send(sock, buffer, bytesOfData, 0);
+	send(sock, buffer, sizeof(buffer), 0);
 
 	/*memset(&hints, 0, sizeof hints); ipv4 vs ipv6
 	hints.ai_family = AF_UNSPEC;
