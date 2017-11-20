@@ -17,7 +17,7 @@
 
 
 int useUdp = 0;
-int udpPort = 33434;
+char udpPort[6] = "33434";
 int nOfNodes;
 char* nodes[30];
 
@@ -44,49 +44,47 @@ void getRtt(int i) {
 
 	struct addrinfo hints, *nodeInfo;
 
-    memset(&hints, 0, sizeof hints);
-    hints.ai_family = AF_UNSPEC;
-    hints.ai_socktype = SOCK_DGRAM;
+	memset(&hints, 0, sizeof hints);
+	hints.ai_family = AF_UNSPEC;
+	hints.ai_socktype = SOCK_DGRAM;
 
-    char port[6];
-    printf(port, "%d", udpPort);
-	if (getaddrinfo(nodes[i], port, &hints, &nodeInfo) != 0) {
+	if (getaddrinfo(nodes[i], udpPort, &hints, &nodeInfo) != 0) {
 		fprintf(stderr, "Při zjišťování informací o zadané adrese došlo k chybě.\n");
 		exit(1);
 	}
 	int isV6, sol, ipErr, ttlFlag;
-    if (nodeInfo->ai_family == AF_INET) { //IPV4
-        isV6 = IPPROTO_IP;
-        ttlFlag = IP_TTL;
-        sol = SOL_IP;
-        ipErr = IP_RECVERR;
-    } else if (nodeInfo->ai_family == AF_INET6) { //IPV6
-        isV6 = IPPROTO_IPV6;
-        ttlFlag = IPV6_UNICAST_HOPS;
-        sol = SOL_IPV6;
-        ipErr = IPV6_RECVERR;
-    } else {
-        fprintf(stderr, "Nepodporovaný protokol.\n");
-    }
-    int sock = socket(nodeInfo->ai_family, nodeInfo->ai_socktype, nodeInfo->ai_protocol);
-    if (sock == -1) {
-            fprintf(stderr, "Nepovedlo se vytvořit socket.\n");
-            exit(1);
-    }
-    /*ok = setsockopt(sock,
-                    isV6,
-                    ttlFlag,
-                    &ttl,
-                    sizeof(ttl));
-    if (ok < 0) {
-        fprintf(stderr, "Nešlo nastavit socket.\n");
-        exit(1);
-    }*/
-    //ok = connect(sock, nodeInfo->ai_addr, nodeInfo->ai_addrlen);
-    if (connect(sock, nodeInfo->ai_addr, nodeInfo->ai_addrlen) < 0) {
-        fprintf(stderr, "Nešlo se spojit s požadovanou adresou.\n");
-        exit(1);
-    }
+	if (nodeInfo->ai_family == AF_INET) { //IPV4
+		isV6 = IPPROTO_IP;
+		ttlFlag = IP_TTL;
+		sol = SOL_IP;
+		ipErr = IP_RECVERR;
+	} else if (nodeInfo->ai_family == AF_INET6) { //IPV6
+		isV6 = IPPROTO_IPV6;
+		ttlFlag = IPV6_UNICAST_HOPS;
+		sol = SOL_IPV6;
+		ipErr = IPV6_RECVERR;
+	} else {
+		fprintf(stderr, "Nepodporovaný protokol.\n");
+	}
+	int sock = socket(nodeInfo->ai_family, nodeInfo->ai_socktype, nodeInfo->ai_protocol);
+	if (sock == -1) {
+			fprintf(stderr, "Nepovedlo se vytvořit socket.\n");
+			exit(1);
+	}
+	/*ok = setsockopt(sock,
+					isV6,
+					ttlFlag,
+					&ttl,
+					sizeof(ttl));
+	if (ok < 0) {
+		fprintf(stderr, "Nešlo nastavit socket.\n");
+		exit(1);
+	}*/
+	//ok = connect(sock, nodeInfo->ai_addr, nodeInfo->ai_addrlen);
+	if (connect(sock, nodeInfo->ai_addr, nodeInfo->ai_addrlen) < 0) {
+		fprintf(stderr, "Nešlo se spojit s požadovanou adresou.\n");
+		exit(1);
+	}
 }
 
 void *msgClock(void *arg) {
