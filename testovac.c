@@ -160,7 +160,7 @@ void udpGetRtt(int nodeI) {
 
 		strftime(ts, 26, "%Y-%m-%d %H:%M:%S", lt);
 
-		printf("%s.%02d %d bytes from %s (ip addr) time=%.2f ms\n", ts, (int)(t2.tv_usec / 100) % 100, bytesOfData, nodes[nodeI], subTimeval(&t1, &t2));
+		printf("%s.%02d %d bytes from %s (ip addr) time=%.2f ms\n", ts, t2.tv_usec % 100, bytesOfData, nodes[nodeI], subTimeval(&t1, &t2));
 
 
 		//printf("data received from %s, port %d\n",inet_ntoa(from.sin_addr),ntohs(from.sin_port));
