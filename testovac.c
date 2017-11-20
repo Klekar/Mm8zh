@@ -210,8 +210,6 @@ void *smallStat() {
 		sleep(aT);
 		if (rttData[1] == 0 && rttData[2])
 			continue;
-		if (rttData[0] == rttData[2])
-			printf("%s.%02d %s: status down", ts, t.tv_usec % 100, nodes[nodeI]);
 
 		struct timeval t;
 		(void) gettimeofday(&t, NULL);
@@ -220,6 +218,9 @@ void *smallStat() {
 		char ts[26];
 
 		strftime(ts, 26, "%Y-%m-%d %H:%M:%S", lt);
+		
+		if (rttData[0] == rttData[2])
+			printf("%s.%02d %s: status down", ts, t.tv_usec % 100, nodes[nodeI]);
 
 		printf("%s.%02d %s: %.3f packet loss, %d packet lost, %.3f (%d) packets exceeded RTT threshold %.3fs\n", ts, t.tv_usec % 100, nodes[nodeI], rttData[2]/rttData[0],rttData[2],rttData[1]/rttData[0],rttData[1],rTime);
 
