@@ -127,7 +127,8 @@ void *udpServer() {
 
 	server.sin_family = AF_INET;					// set IPv4 addressing
 	server.sin_addr.s_addr = htonl(INADDR_ANY);		// the server listens to any interface
-	server.sin_port = htons(atoi(udpRcvPort));		// the server listens on this port
+	//server.sin_port = htons(atoi(udpRcvPort));		// the server listens on this port
+	server.sin_port = htons(udpRcvPort);			// the server listens on this port
 
 	printf("opening UDP socket(...)\n");
 	if ((fd = socket(AF_INET, SOCK_DGRAM, 0)) == -1)	// create the server UDP socket
@@ -173,7 +174,7 @@ int main(int argc, char** argv) {
 				strcpy(udpSendPort, optarg);
 				break;
 			case 'l':
-				udpRcvPort = optarg;
+				udpRcvPort = atoi(optarg);
 				break;
 			default:
 				fprintf(stderr, "Špatné argumenty.\n");
