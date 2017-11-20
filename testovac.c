@@ -213,8 +213,8 @@ void *smallStat() {
 		if (rttData[0] == rttData[2])
 			printf("%s.%02d %s: status down", ts, t.tv_usec % 100, nodes[nodeI]);
 
-
-		struct timeval t = gettimeofday();
+		struct timeval t;
+		(void) gettimeofday(&t, NULL);
 		time_t t = t.tv_sec;
 		struct tm* lt = localtime(&t);
 		char ts[26];
