@@ -133,7 +133,7 @@ void *udpGetRtt(/*int nodeI*/) {
 
 
 		//if ((ok = recv(sock, buffer2, BUFFER_SIZE,0)) == -1) {
-		if ((ok = recvfrom(sock, buffer2, BUFFER_SIZE,0)) == -1) {
+		if ((ok = recvfrom(sock, buffer2, BUFFER_SIZE,0, (struct sockaddr *)&server, &len)) == -1) {
 			rttDataHour[0]++;
 			rttData[0]++;
 			rttDataHour[2]++;
