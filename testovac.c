@@ -51,12 +51,12 @@ void getRtt(int i) {
 		exit(1);
 	}
 	int isV6, sol, ipErr, ttlFlag;
-    if (servinfo->ai_family == AF_INET) { //IPV4
+    if (nodeInfo->ai_family == AF_INET) { //IPV4
         isV6 = IPPROTO_IP;
         ttlFlag = IP_TTL;
         sol = SOL_IP;
         ipErr = IP_RECVERR;
-    } else if (servinfo->ai_family == AF_INET6) { //IPV6
+    } else if (nodeInfo->ai_family == AF_INET6) { //IPV6
         isV6 = IPPROTO_IPV6;
         ttlFlag = IPV6_UNICAST_HOPS;
         sol = SOL_IPV6;
@@ -65,7 +65,7 @@ void getRtt(int i) {
         fprintf(stderr, "Nepodporovaný protokol.\n");
     }
     int sock;
-    if ((sock = socket(servinfo->ai_family, servinfo->ai_socktype, servinfo->ai_protocol)) == -1) {
+    if ((sock = socket(nodeInfo->ai_family, nodeInfo->ai_socktype, nodeInfo->ai_protocol)) == -1) {
             fprintf(stderr, "Nepovedlo se vytvořit socket.\n");
             exit(1);
     }
@@ -78,7 +78,7 @@ void getRtt(int i) {
         fprintf(stderr, "Nešlo nastavit socket.\n");
         exit(1);
     }*/
-    ok = connect(sock, servinfo->ai_addr, servinfo->ai_addrlen);
+    ok = connect(sock, nodeInfo->ai_addr, nodeInfo->ai_addrlen);
     if (ok < 0) {
         fprintf(stderr, "Nešlo se spojit s požadovanou adresou.\n");
         exit(1);
