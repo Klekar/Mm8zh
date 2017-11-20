@@ -23,12 +23,14 @@
 
 int useUdp = 0;
 int wSec = 2; // arg -w
+int verbose = 0;
 char udpSendPort[6] = "33434";
 //char udpRcvPort[6] = "33434";
 int udpRcvPort = -1;
 int nOfNodes;
 char* nodes[30];
 int bytesOfData = 56;
+float** rtts;
 
 /**
  * function used for getting time difference in ms beween base and min
@@ -154,14 +156,15 @@ void udpGetRtt(int nodeI) {
 			exit(1);
 		}
 
-		time_t t = t2.tv_sec;
-		struct tm* lt = localtime(&t);
-		char ts[26];
+		if (verbose) {
+			time_t t = t2.tv_sec;
+			struct tm* lt = localtime(&t);
+			char ts[26];
 
-		strftime(ts, 26, "%Y-%m-%d %H:%M:%S", lt);
+			strftime(ts, 26, "%Y-%m-%d %H:%M:%S", lt);
 
-		printf("%s.%02d %d bytes from %s (ip addr) time=%.2f ms\n", ts, t2.tv_usec % 100, bytesOfData, nodes[nodeI], subTimeval(&t1, &t2));
-
+			printf("%s.%02d %d bytes from %s (ip addr) time=%.2f ms\n", ts, t2.tv_usec % 100, bytesOfData, nodes[nodeI], subTimeval(&t1, &t2));
+		}
 
 		//printf("data received from %s, port %d\n",inet_ntoa(from.sin_addr),ntohs(from.sin_port));
 		if (strcmp(buffer, buffer2)) {
@@ -248,14 +251,13 @@ void *udpServer() {
 
 	server.sin_family = AF_INET;					// set IPv4 addressing
 	server.sin_addr.s_addr = htonl(INADDR_ANY);		// the server listens to any interface
-	//server.sin_port = htons(atoi(udpRcvPort));		// the server listens on this port
 	server.sin_port = htons(udpRcvPort);			// the server listens on this port
 
-	printf("opening UDP socket(...)\n");
+	//printf("opening UDP socket(...)\n");
 	if ((fd = socket(AF_INET, SOCK_DGRAM, 0)) == -1)	// create the server UDP socket
 		fprintf(stderr, "Couldn't create socket.\n");
 
-	printf("binding to the port %d (%d)\n",htons(server.sin_port),server.sin_port);
+	//printf("binding to the port %d (%d)\n",htons(server.sin_port),server.sin_port);
 	if (bind(fd, (struct sockaddr *)&server, sizeof(server)) == -1)	// binding with the port
 		fprintf(stderr, "Couldn't bind socket.\n");
 
@@ -292,6 +294,9 @@ int main(int argc, char** argv) {
 				useUdp = 1;
 				bytesOfData = 64;
 				break;
+			case 'v':
+				verbose = 1;
+				break;
 			case 'p':
 				strcpy(udpSendPort, optarg);
 				break;
@@ -322,8 +327,11 @@ int main(int argc, char** argv) {
 	}
 
 
-	int aT = 10; // argument -t print stat interval (300)
-	int aI = 1000; // argument -i msg send interval (100)
+	int aT = 10; // argument -t print stat interval (300)[s]
+	int aI = 1000; // argument -i msg send interval (100)[ms]
+
+	float aSize = (int) (at/(ai/1000))*1.5;
+	rtts = (float **) malloc(sizeof(float)*aSize*nOfNodes);
 
 	if (nOfNodes > 0) { // run only if any nodes was inserted
 		int *argT = malloc(sizeof(*argT));
