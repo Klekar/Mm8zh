@@ -21,6 +21,7 @@
 
 int useUdp = 0;
 char udpSendPort[6] = "33434";
+char udpRcvPort[6] = "33434";
 int nOfNodes;
 char* nodes[30];
 
@@ -128,7 +129,7 @@ void *udpServerMain() {
 
 	server.sin_family = AF_INET;					// set IPv4 addressing
 	server.sin_addr.s_addr = htonl(INADDR_ANY);		// the server listens to any interface
-	server.sin_port = htons(atoi(argv[1]));			// the server listens on this port
+	server.sin_port = htons(atoi(udpRcvPort));		// the server listens on this port
 
 	printf("opening UDP socket(...)\n");
 	if ((fd = socket(AF_INET, SOCK_DGRAM, 0)) == -1)	// create the server UDP socket
