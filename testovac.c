@@ -91,7 +91,7 @@ void udpGetRtt(int nodeI) {
 	}
 	srand(time(NULL));
 	for ( int i = sizeof(struct timeval); i < bytesOfData; i++) {
-		char r = rand() % 256;
+		char r = (rand() % 256) + '0';
 		//int r = (rand() % 256) + '0';
 	}
 
@@ -229,6 +229,9 @@ int main(int argc, char** argv) {
 				if (atoi(optarg) < sizeof(struct timeval)) {
 					bytesOfData = sizeof(struct timeval);
 					printf("Moc maly objem dat pro testovani. Pouzije se %dB.", bytesOfData);
+				} else if (atoi(optarg) > BUFFER_SIZE) {
+					bytesOfData = sizeof(struct timeval);
+					printf("Moc velky objem dat pro testovani. Pouzije se %dB.", BUFFER_SIZE);
 				} else
 					bytesOfData = atoi(optarg);
 				break;
