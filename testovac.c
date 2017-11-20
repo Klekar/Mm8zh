@@ -80,7 +80,8 @@ void udpGetRtt(int nodeI) {
 
 	struct timeval t1, t2;
 	struct timezone tzone;
-	unsigned char buffer[bytesOfData];
+	unsigned char buffer[bytesOfData]; // sending buffer
+	unsigned char buffer2[bytesOfData]; // receiving buffer
 
 	srand(time(NULL));
 	for ( int i = 0; i < bytesOfData; i++) {
@@ -120,7 +121,7 @@ void udpGetRtt(int nodeI) {
 	printf("data sent from %s, port %d (%d) to %s, port %d (%d)\n",inet_ntoa(from.sin_addr), ntohs(from.sin_port), from.sin_port, inet_ntoa(server.sin_addr),ntohs(server.sin_port), server.sin_port);
 
 
-	if ((ok = recv(sock, buffer, BUFFER_SIZE,0)) == -1) {
+	if ((ok = recv(sock, buffer2, BUFFER_SIZE,0)) == -1) {
 		fprintf(stderr, "recv() se nezdarilo\n");
 		exit(1);
 	} else if (ok > 0){
@@ -132,7 +133,10 @@ void udpGetRtt(int nodeI) {
 	}
 
 		printf("data received from %s, port %d\n",inet_ntoa(from.sin_addr),ntohs(from.sin_port));
-		printf("%.*s",ok,buffer);				// print the answer
+		if (strcmp(buffer, buffer2)) {
+			printf("data se shoduji\n");
+		}
+		//printf("%.*s",ok,buffer2);				// print the answer
 	}
 
 	/*memset(&hints, 0, sizeof hints); ipv4 vs ipv6
@@ -237,7 +241,7 @@ void *udpServer() {
 			else if (cliSock != msgSize)
 				fprintf(stderr, "sendto(): buffer written partially\n");
 			else
-				printf("data \"%.*s\" sent from port %d to %s, port %d\n",cliSock,buffer,ntohs(server.sin_port), inet_ntoa(client.sin_addr),ntohs(client.sin_port));
+				printf("data received from port %d to %s, port %d\n",/*cliSock,buffer,*/ntohs(server.sin_port), inet_ntoa(client.sin_addr),ntohs(client.sin_port));
 		}
 	}
 }
