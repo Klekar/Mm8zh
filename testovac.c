@@ -27,6 +27,7 @@ char udpSendPort[6] = "33434";
 int udpRcvPort = -1;
 int nOfNodes;
 char* nodes[30];
+int bytesOfData = 56;
 
 void printHelp() {
 	printf("Nápověda.");
@@ -77,7 +78,20 @@ void udpGetRtt(int i) {
 		exit(1);
 	}
 
+	struct timeval t1, t2;
+	struct timezone tzone;
 
+	(void) gettimeofday(&t1, &tzone); //////////// ZAČÁTEK MĚŘENÍ ČASU
+
+	char* buffer;
+	buffer = (char *) malloc(bytesOfData);
+	if (buffer == NULL) {
+		fprintf(stderr, "Nedostatek místa pro alokaci paměti bufferu. (send udp)\n");
+		exit(1);
+	}
+
+
+	send(sock, buffer, bytesOfData, 0);
 
 	/*memset(&hints, 0, sizeof hints); ipv4 vs ipv6
 	hints.ai_family = AF_UNSPEC;
@@ -199,12 +213,20 @@ int main(int argc, char** argv) {
 				exit(0);
 			case 'u':
 				useUdp = 1;
+				bytesOfData = 64;
 				break;
 			case 'p':
 				strcpy(udpSendPort, optarg);
 				break;
 			case 'l':
 				udpRcvPort = atoi(optarg);
+				break;
+			case 's':
+				if (atoi(optarg) < sizeof(struct timeval)) {
+					bytesOfData = sizeof(struct timeval);
+					printf("Moc maly objem dat pro testovani. Pouzije se %dB.", bytesOfData);
+				} else
+					bytesOfData = atoi(optarg);
 				break;
 			default:
 				fprintf(stderr, "Špatné argumenty.\n");
