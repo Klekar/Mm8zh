@@ -384,6 +384,7 @@ int main(int argc, char** argv) {
 	for (int i = 0; i < nOfNodes; i++) {
 		waitpid(pids[i], NULL, 0);
 	}
+	pthread_join(updServTID, NULL);
 
 	/*pid_t pid;
 	pid = fork();
