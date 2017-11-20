@@ -33,8 +33,8 @@ char* nodes[30];
 int bytesOfData = 56;
 float rttDataHour[6];
 float rttData[3];
-int aT = 10;	// argument -t print stat interval (300)[s]
-int aI = 1000;	// argument -i msg send interval (100)[ms]
+int aT = 300;	// argument -t print stat interval (300)[s]
+int aI = 100;	// argument -i msg send interval (100)[ms]
 int nodeI;
 
 
@@ -208,7 +208,7 @@ void *udpGetRtt(/*int nodeI*/) {
 void *smallStat() {
 	while(1) {
 		sleep(aT);
-		if (rttData[1] == 0 && rttData[2])
+		if (rttData[1] == 0 && rttData[2] == 0)
 			continue;
 
 		struct timeval t;
