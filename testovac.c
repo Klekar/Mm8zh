@@ -83,19 +83,20 @@ void udpGetRtt(int nodeI) {
 
 	(void) gettimeofday(&t1, &tzone); //////////// ZAČÁTEK MĚŘENÍ ČASU
 
-	char* buffer;
+	/*char* buffer;
 	buffer = (char *) malloc(bytesOfData);
 	if (buffer == NULL) {
 		fprintf(stderr, "Nedostatek místa pro alokaci paměti bufferu. (send udp)\n");
 		exit(1);
 	}
 	srand(time(NULL));
-	for ( int i = 0/*sizeof(struct timeval)*/; i < bytesOfData; i++) {
+	for ( int i = sizeof(struct timeval); i < bytesOfData; i++) {
 		char r = rand() % 256;
 		//int r = (rand() % 256) + '0';
-	}
+	}*/
+	char buffer[8] = "hell";
 
-	send(sock, buffer, bytesOfData, 0);
+	send(sock, buffer, 8, 0);
 
 	/*memset(&hints, 0, sizeof hints); ipv4 vs ipv6
 	hints.ai_family = AF_UNSPEC;
