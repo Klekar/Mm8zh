@@ -40,14 +40,16 @@ void *printClock(void *arg) {
 void getRtt(int i) {
 	printf("%s\n", nodes[i]);
 
-	struct addrinfo hints, *servinfo;
+	struct addrinfo hints, *nodeInfo;
 
     memset(&hints, 0, sizeof hints);
     hints.ai_family = AF_UNSPEC;
     hints.ai_socktype = SOCK_DGRAM;
 
-
-	getaddrinfo(nodes[i], "33434", &hints, &servinfo);
+	if (getaddrinfo(nodes[i], "33434", &hints, &nodeInfo) != 0) {
+		fprintf(stderr, "Při zjišťování informací o zadané adrese došlo k chybě.\n");
+		exit(1);
+	}
 }
 
 void *msgClock(void *arg) {
