@@ -213,8 +213,8 @@ void *smallStat() {
 
 		struct timeval t;
 		(void) gettimeofday(&t, NULL);
-		time_t t = t.tv_sec;
-		struct tm* lt = localtime(&t);
+		time_t tx = t.tv_sec;
+		struct tm* lt = localtime(&tx);
 		char ts[26];
 
 		strftime(ts, 26, "%Y-%m-%d %H:%M:%S", lt);
