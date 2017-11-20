@@ -49,7 +49,7 @@ void getRtt(int i) {
     hints.ai_socktype = SOCK_DGRAM;
 
     char port[6];
-    printf(port, %d, udpPort);
+    printf(port, "%d", udpPort);
 	if (getaddrinfo(nodes[i], port, &hints, &nodeInfo) != 0) {
 		fprintf(stderr, "Při zjišťování informací o zadané adrese došlo k chybě.\n");
 		exit(1);
