@@ -90,8 +90,8 @@ void udpGetRtt(int nodeI) {
 		exit(1);
 	}
 	srand(time(NULL));
-	for ( int i = sizeof(struct timeval); i < bytesOfData; i++) {
-		char r = (rand() % 256) + '0';
+	for ( int i = 0/*sizeof(struct timeval)*/; i < bytesOfData; i++) {
+		char r = rand() % 256;
 		//int r = (rand() % 256) + '0';
 	}
 
