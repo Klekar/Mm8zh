@@ -16,13 +16,13 @@
 #include <netdb.h>
 
 
-#define QUEUE 1				// queue length for  waiting connections
 #define BUFFER_SIZE	(1024)	// length of the receiving buffer
 
 
 int useUdp = 0;
 char udpSendPort[6] = "33434";
-char udpRcvPort[6] = "33434";
+//char udpRcvPort[6] = "33434";
+int udpRcvPort = -1;
 int nOfNodes;
 char* nodes[30];
 
@@ -137,38 +137,21 @@ void *udpServer() {
 	if (bind(fd, (struct sockaddr *)&server, sizeof(server)) == -1)	// binding with the port
 		fprintf(stderr, "Couldn't bind socket.\n");
 
-	if (listen(fd,QUEUE) != 0)		//set a queue for incoming connections
-		fprintf(stderr, "Couldn't setup a queue.\n");
-	printf("Waiting for incoming connections...\n");
-
-	pid_t pid;
 	int len = sizeof(client);
 	int cliSock, msgSize;
 	char buffer[BUFFER_SIZE];
-	while(1) {	// wait for incoming connections (concurrent server)
-		if ((cliSock = accept(fd, (struct sockaddr *)&client, (socklen_t*)&len)) == -1)
-			fprintf(stderr, "Couldn't accept.\n");
-		pid = fork();
-		if ( pid > 0 ) { // parent process
-			close(cliSock);
-		} else if ( pid == 0 ) { // child process
-			close(fd);		// close parent's socket
-			p = (long) getpid();	// current child's PID
-			//while((msgSize = read(cliSock, buffer, BUFFER_SIZE)) > 0) {	// read the message
-			while((msgSize = recvfrom(fd, buffer, BUFFER, 0, (struct sockaddr *)&client, &len)) >= 0) {
-				printf("buffer = \"%.*s\"\n",msgSize,buffer);
-				//i = write(cliSock,buffer,msgSize);    // send a converted message to the client // TCP
-				i = sendto(fd, buffer, msgSize, 0, (struct sockaddr *)&client, len); // send the answer
-				if (i == -1)                           // check if data was successfully sent out
-					fprintf(stderr, "write() failed\n");
-				else if (i != msgSize)
-					fprintf(stderr, "write(): buffer written partially\n");
-			}
-			printf("closing newsock\n");
-			close(cliSock);
-			_Exit(0);
-		} else
-			printf("Couldn't fork()\n");
+
+	while (1) {
+		while((msgSize = recvfrom(fd, buffer, BUFFER, 0, (struct sockaddr *)&client, &len)) >= 0) {
+			printf("buffer = \"%.*s\"\n",msgSize,buffer);
+			i = sendto(fd, buffer, msgSize, 0, (struct sockaddr *)&client, len); // send the answer
+			if (i == -1)								// check if data was successfully sent out
+				fprintf(stderr, "sendto() failed\n");
+			else if (i != msgSize)
+				fprintf(stderr, "sendto(): buffer written partially\n");
+			else
+				printf("data \"%.*s\" sent from port %d to %s, port %d\n",r,buffer,ntohs(server.sin_port), inet_ntoa(client.sin_addr),ntohs(client.sin_port));
+		}
 	}
 }
 
@@ -188,6 +171,9 @@ int main(int argc, char** argv) {
 				break;
 			case 'p':
 				strcpy(udpSendPort, optarg);
+				break;
+			case 'l':
+				udpRcvPort = optarg;
 				break;
 			default:
 				fprintf(stderr, "Špatné argumenty.\n");
@@ -223,6 +209,11 @@ int main(int argc, char** argv) {
 	*argI = aI;
 	pthread_t mClockTID;
 	pthread_create(&mClockTID, NULL, &msgClock, argI);
+
+	if (udpRcvPort != -1) {
+		pthread_t updServTID;
+		pthread_create(&updServTID, NULL, &udpServer, NULL);
+	}
 
 	sleep(1000);
 
