@@ -16,8 +16,11 @@
 #include <netdb.h>
 
 
+#define BUFFER	(1024)		 // length of the receiving buffer
+
+
 int useUdp = 0;
-char udpPort[6] = "33434";
+char udpSendPort[6] = "33434";
 int nOfNodes;
 char* nodes[30];
 
@@ -48,7 +51,7 @@ void getRtt(int i) {
 	hints.ai_family = AF_UNSPEC;
 	hints.ai_socktype = SOCK_DGRAM;
 
-	if (getaddrinfo(nodes[i], udpPort, &hints, &nodeInfo) != 0) {
+	if (getaddrinfo(nodes[i], udpSendPort, &hints, &nodeInfo) != 0) {
 		fprintf(stderr, "Při zjišťování informací o zadané adrese došlo k chybě.\n");
 		exit(1);
 	}
@@ -88,7 +91,7 @@ void getRtt(int i) {
 }
 
 void *msgClock(void *arg) {
-	printf("msgClock  start\n");
+	printf("msgClock		start\n");
 	printStats();
 	int i = *((int *) arg);
 	while(1)
@@ -115,11 +118,33 @@ void *msgClock(void *arg) {
 	return 0;
 }
 
+void udpServerChild() {
+}
+
+void *udpServerMain() {
+	int fd;							// an incoming socket descriptor
+	struct sockaddr_in server;		// server's address structure
+	struct sockaddr_in client;		// client's address structure
+
+	server.sin_family = AF_INET;					// set IPv4 addressing
+	server.sin_addr.s_addr = htonl(INADDR_ANY);		// the server listens to any interface
+	server.sin_port = htons(atoi(argv[1]));			// the server listens on this port
+
+	printf("opening UDP socket(...)\n");
+	if ((fd = socket(AF_INET, SOCK_DGRAM, 0)) == -1)	// create the server UDP socket
+		fprintf(stderr, "Couldn't create socket.\n");
+
+	printf("binding to the port %d (%d)\n",htons(server.sin_port),server.sin_port);
+	if (bind(fd, (struct sockaddr *)&server, sizeof(server)) == -1)	// binding with the port
+		fprintf(stderr, "Couldn't bind socket.\n");
+
+}
+
 /**
  * testovac [-h] [-u] [-v] [-t <interval>] [-i <interval>] [-w <timeout>] [-p <port>] [-l <port>] [-s <size>] [-r <value>] <uzel1> <uzel2> <uzel3> ...
  */
 int main(int argc, char** argv) {
-	//char* node = "google.com";
+
 	char c;
 	while ((c = getopt (argc, argv, "huvt:i:w:p:l:s:r:")) != -1) {
 		switch(c){
@@ -128,6 +153,9 @@ int main(int argc, char** argv) {
 				exit(0);
 			case 'u':
 				useUdp = 1;
+				break;
+			case 'p':
+				strcpy(udpSendPort, optarg);
 				break;
 			default:
 				fprintf(stderr, "Špatné argumenty.\n");
