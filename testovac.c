@@ -88,7 +88,7 @@ void *udpGetRtt(/*int nodeI*/) {
 			}
 		struct timeval timOut; // initialize timeout
 		timOut.tv_sec = (int) rtt*2;
-		timOut.tv_usec = (int) (rtt % 1) * 100000;
+		timOut.tv_usec = (int) (rtt % 1.0) * 100000;
 		if (setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, (const char*)&timOut,sizeof(struct timeval)) < 0) {
 			printf("Nepodarilo se nastavit socket. (udp send)");
 			_Exit(1);
