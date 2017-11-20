@@ -93,6 +93,7 @@ void udpGetRtt(int nodeI) {
 	for ( int i = sizeof(struct timeval); i < bytesOfData; i++) {
 		buffer[i] = rand() % 256;
 		//int r = (rand() % 256) + '0';
+		printf("%c\n", buffer[i]);
 	}
 
 	send(sock, buffer, bytesOfData, 0);
