@@ -4,6 +4,8 @@
 #include <pthread.h>
 #include <sys/wait.h> // wati()
 
+#include <time.h>
+
 
 #include <string.h>
 #include <arpa/inet.h>
@@ -44,12 +46,40 @@ void *printClock(void *arg) {
 	return 0;
 }
 
-void getRtt(int i) {
+void udpGetRtt(int i) {
 	printf("%s\n", nodes[i]);
 
-	struct addrinfo hints, *nodeInfo;
+	struct sockaddr_in server, from;	// address structures of the server and the client
+	struct hostent *servent;			// network host entry required by gethostbyname()
+	socklen_t len, fromlen;
 
-	memset(&hints, 0, sizeof hints);
+	memset(&server,0,sizeof(server));	// erase the server structure
+	server.sin_family = AF_INET;  
+
+	if ((servent = gethostbyname(nodes[i])) == NULL) {
+		fprintf(stderr, "Nepovedlo se vytvořit socket.\n");
+		exit(1);
+	}
+	memcpy(&server.sin_addr,servent->h_addr,servent->h_length);
+	server.sin_port = htons(atoi(udpSendPort));	// set up port number
+
+	int sock = socket(AF_INET, SOCK_DGRAM, 0);
+	if (sock == -1) {
+		fprintf(stderr, "Nepovedlo se vytvořit socket.\n");
+		exit(1);
+	}
+
+	len = sizeof(server);
+	fromlen = sizeof(from);
+
+	if (connect(sock, (struct sockaddr *)&server, sizeof(server))  == -1) {
+		fprintf(stderr, "Nepovedlo se vytvořit socket.\n");
+		exit(1);
+	}
+
+
+
+	/*memset(&hints, 0, sizeof hints); ipv4 vs ipv6
 	hints.ai_family = AF_UNSPEC;
 	hints.ai_socktype = SOCK_DGRAM;
 
@@ -70,12 +100,12 @@ void getRtt(int i) {
 		ipErr = IPV6_RECVERR;
 	} else {
 		fprintf(stderr, "Nepodporovaný protokol.\n");
-	}
-	int sock = socket(nodeInfo->ai_family, nodeInfo->ai_socktype, nodeInfo->ai_protocol);
+	}*/
+	/*int sock = socket(nodeInfo->ai_family, nodeInfo->ai_socktype, nodeInfo->ai_protocol);
 	if (sock == -1) {
-			fprintf(stderr, "Nepovedlo se vytvořit socket.\n");
-			exit(1);
-	}
+		fprintf(stderr, "Nepovedlo se vytvořit socket.\n");
+		exit(1);
+	}*/
 	/*ok = setsockopt(sock,
 					isV6,
 					ttlFlag,
@@ -86,10 +116,10 @@ void getRtt(int i) {
 		exit(1);
 	}*/
 	//ok = connect(sock, nodeInfo->ai_addr, nodeInfo->ai_addrlen);
-	if (connect(sock, nodeInfo->ai_addr, nodeInfo->ai_addrlen) < 0) {
+	/*if (connect(sock, nodeInfo->ai_addr, nodeInfo->ai_addrlen) < 0) {
 		fprintf(stderr, "Nešlo se spojit s požadovanou adresou.\n");
 		exit(1);
-	}
+	}*/
 }
 
 void *msgClock(void *arg) {
@@ -106,7 +136,7 @@ void *msgClock(void *arg) {
 			pid = fork();
 			if (pid == 0) { // child proces
 				//printf("child process %d\n", i);
-				getRtt(i);
+				udpGetRtt(i);
 				_Exit(0);
 			} else { // parent proces
 				pids[i] = pid;
@@ -160,7 +190,7 @@ void *udpServer() {
  * testovac [-h] [-u] [-v] [-t <interval>] [-i <interval>] [-w <timeout>] [-p <port>] [-l <port>] [-s <size>] [-r <value>] <uzel1> <uzel2> <uzel3> ...
  */
 int main(int argc, char** argv) {
-
+	printf("%d\n", sizeof(char));
 	char c;
 	while ((c = getopt (argc, argv, "huvt:i:w:p:l:s:r:")) != -1) {
 		switch(c){
