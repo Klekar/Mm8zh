@@ -87,7 +87,7 @@ void udpGetRtt(int nodeI) {
 	struct timeval timOut; // initialize timeout
 	timOut.tv_sec = 2;
 	timOut.tv_usec = 0;
-	if (setsockopt(sockfd, SOL_SOCKET, SO_RCVTIMEO, (const char*)&timOut,sizeof(struct timeval)) < 0) {
+	if (setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, (const char*)&timOut,sizeof(struct timeval)) < 0) {
 		printf("Nepodarilo se nastavit socket. (udp send)");
 		_Exit(1);
 	}
@@ -155,12 +155,12 @@ void udpGetRtt(int nodeI) {
 		}
 
 		time_t t = t2.tv_sec;
-		struct tm* lt = localtime(&nt);
+		struct tm* lt = localtime(&t);
 		char ts[26];
 
 		strftime(ts, 26, "%Y-%m-%d %H:%M:%S", nt);
 
-		printf("%s.%02d %d bytes from %s (ip addr) time=%.2f ms\n", ts, t2.tv_usec % 1000, bytesOfData, node[nodeI], subTimeval(&t1, &t2));
+		printf("%s.%02d %d bytes from %s (ip addr) time=%.2f ms\n", ts, t2.tv_usec % 1000, bytesOfData, nodes[nodeI], subTimeval(&t1, &t2));
 
 
 		printf("data received from %s, port %d\n",inet_ntoa(from.sin_addr),ntohs(from.sin_port));
