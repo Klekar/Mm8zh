@@ -142,15 +142,15 @@ void *udpServer() {
 	char buffer[BUFFER_SIZE];
 
 	while (1) {
-		while((msgSize = recvfrom(fd, buffer, BUFFER, 0, (struct sockaddr *)&client, &len)) >= 0) {
+		while((msgSize = recvfrom(fd, buffer, BUFFER_SIZE, 0, (struct sockaddr *)&client, &len)) >= 0) {
 			printf("buffer = \"%.*s\"\n",msgSize,buffer);
-			i = sendto(fd, buffer, msgSize, 0, (struct sockaddr *)&client, len); // send the answer
-			if (i == -1)								// check if data was successfully sent out
+			cliSock = sendto(fd, buffer, msgSize, 0, (struct sockaddr *)&client, len); // send the answer
+			if (cliSock == -1)								// check if data was successfully sent out
 				fprintf(stderr, "sendto() failed\n");
-			else if (i != msgSize)
+			else if (cliSock != msgSize)
 				fprintf(stderr, "sendto(): buffer written partially\n");
 			else
-				printf("data \"%.*s\" sent from port %d to %s, port %d\n",r,buffer,ntohs(server.sin_port), inet_ntoa(client.sin_addr),ntohs(client.sin_port));
+				printf("data \"%.*s\" sent from port %d to %s, port %d\n",cliSock,buffer,ntohs(server.sin_port), inet_ntoa(client.sin_addr),ntohs(client.sin_port));
 		}
 	}
 }
