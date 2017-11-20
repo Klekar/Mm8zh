@@ -16,6 +16,8 @@
 #include <netdb.h>
 
 
+int useUdp = 0;
+int udpPort = 33434;
 int nOfNodes;
 char* nodes[30];
 
@@ -46,7 +48,7 @@ void getRtt(int i) {
     hints.ai_family = AF_UNSPEC;
     hints.ai_socktype = SOCK_DGRAM;
 
-	if (getaddrinfo(nodes[i], "33434", &hints, &nodeInfo) != 0) {
+	if (getaddrinfo(nodes[i], udpPort, &hints, &nodeInfo) != 0) {
 		fprintf(stderr, "Při zjišťování informací o zadané adrese došlo k chybě.\n");
 		exit(1);
 	}
@@ -64,8 +66,8 @@ void getRtt(int i) {
     } else {
         fprintf(stderr, "Nepodporovaný protokol.\n");
     }
-    int sock;
-    if ((sock = socket(nodeInfo->ai_family, nodeInfo->ai_socktype, nodeInfo->ai_protocol)) == -1) {
+    int sock = socket(nodeInfo->ai_family, nodeInfo->ai_socktype, nodeInfo->ai_protocol);
+    if (sock == -1) {
             fprintf(stderr, "Nepovedlo se vytvořit socket.\n");
             exit(1);
     }
@@ -124,6 +126,9 @@ int main(int argc, char** argv) {
 			case 'h':
 				printHelp();
 				exit(0);
+			case 'u':
+				useUdp = 1;
+				break;
 			default:
 				fprintf(stderr, "Špatné argumenty.\n");
 				break;
