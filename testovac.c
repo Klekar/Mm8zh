@@ -30,7 +30,11 @@ int udpRcvPort = -1;
 int nOfNodes;
 char* nodes[30];
 int bytesOfData = 56;
-float** rtts;
+float rttData[6];
+int aT = 10;	// argument -t print stat interval (300)[s]
+int aI = 1000;	// argument -i msg send interval (100)[ms]
+int nodeI;
+
 
 /**
  * function used for getting time difference in ms beween base and min
@@ -54,17 +58,7 @@ void printStats() {
 	printf("stats\n");
 }
 
-void *printClock(void *arg) {
-	int t = *((int *) arg);
-	while(1)
-	{
-		sleep(t);
-		printStats();
-	}
-	return 0;
-}
-
-void udpGetRtt(int nodeI) {
+void *udpGetRtt(/*int nodeI*/) {
 	printf("%s\n", nodes[nodeI]);
 
 	struct sockaddr_in server, from;	// address structures of the server and the client
@@ -115,20 +109,6 @@ void udpGetRtt(int nodeI) {
 	}
 
 	(void) gettimeofday(&t1, &tzone); //////////// ZAČÁTEK MĚŘENÍ ČASU
-	/*char temp;
-	temp = &t1;*/
-
-	/*unsigned char buffer[bytesOfData];	  posilani time v packetu
-	int timevalSize = sizeof(t1);
-	for ( int i = 0; i < timevalSize; i++) {
-		buffer[i] = (t1 >> ((timevalSize - 1)*8) ) & 0xFFFFFFFF;
-	}
-	srand(time(NULL));
-	for ( int i = timevalSize; i < bytesOfData; i++) {
-		buffer[i] = rand() % 256;
-		//int r = (rand() % 256) + '0';
-		//printf("%c\n", buffer[i]);
-	}*/
 
 	int ok = send(sock, buffer, sizeof(buffer), 0);
 	if (ok == -1) {
@@ -150,7 +130,7 @@ void udpGetRtt(int nodeI) {
 		exit(1);
 	} else if (ok > 0){
 		(void) gettimeofday(&t2, &tzone); //////////// KONEC MĚŘENÍ ČASU
-		// obtain the remote IP adddress and port from the server (cf. recfrom())
+
 		if (getpeername(sock, (struct sockaddr *) &from, &fromlen) != 0) {
 			fprintf(stderr, "getpeername() se nezdarilo\n");
 			exit(1);
@@ -172,51 +152,9 @@ void udpGetRtt(int nodeI) {
 		}
 		//printf("%.*s",ok,buffer2);				// print the answer
 	}
-
-	/*memset(&hints, 0, sizeof hints); ipv4 vs ipv6
-	hints.ai_family = AF_UNSPEC;
-	hints.ai_socktype = SOCK_DGRAM;
-
-	if (getaddrinfo(nodes[i], udpSendPort, &hints, &nodeInfo) != 0) {
-		fprintf(stderr, "Při zjišťování informací o zadané adrese došlo k chybě.\n");
-		exit(1);
-	}
-	int isV6, sol, ipErr, ttlFlag;
-	if (nodeInfo->ai_family == AF_INET) { //IPV4
-		isV6 = IPPROTO_IP;
-		ttlFlag = IP_TTL;
-		sol = SOL_IP;
-		ipErr = IP_RECVERR;
-	} else if (nodeInfo->ai_family == AF_INET6) { //IPV6
-		isV6 = IPPROTO_IPV6;
-		ttlFlag = IPV6_UNICAST_HOPS;
-		sol = SOL_IPV6;
-		ipErr = IPV6_RECVERR;
-	} else {
-		fprintf(stderr, "Nepodporovaný protokol.\n");
-	}*/
-	/*int sock = socket(nodeInfo->ai_family, nodeInfo->ai_socktype, nodeInfo->ai_protocol);
-	if (sock == -1) {
-		fprintf(stderr, "Nepovedlo se vytvořit socket.\n");
-		exit(1);
-	}*/
-	/*ok = setsockopt(sock,
-					isV6,
-					ttlFlag,
-					&ttl,
-					sizeof(ttl));
-	if (ok < 0) {
-		fprintf(stderr, "Nešlo nastavit socket.\n");
-		exit(1);
-	}*/
-	//ok = connect(sock, nodeInfo->ai_addr, nodeInfo->ai_addrlen);
-	/*if (connect(sock, nodeInfo->ai_addr, nodeInfo->ai_addrlen) < 0) {
-		fprintf(stderr, "Nešlo se spojit s požadovanou adresou.\n");
-		exit(1);
-	}*/
 }
 
-void *msgClock(void *arg) {
+/*void *msgClock(void *arg) {
 	printf("msgClock		start\n");
 	printStats();
 	int i = *((int *) arg);
@@ -241,6 +179,35 @@ void *msgClock(void *arg) {
 			waitpid(pids[i], NULL, 0);
 		}
 	}
+	return 0;
+}*/
+
+void *smallStat() {
+	
+}
+
+void *bigStat() {
+	
+}
+
+void nodeProcess(int nOfNode) {
+	//float rttData[6];
+	nodeI = nOfNode;
+
+	pthread_t workTID;
+	pthread_create(&workTID, NULL, &udpGetRtt, NULL);
+
+	pthread_t smallStatTID;
+	pthread_create(&smallStatTID, NULL, &smallStat, NULL);
+
+	pthread_t bigStatTID;
+	pthread_create(&bigStatTID, NULL, &bigStat, NULL);
+
+	pthread_join(workTID, NULL);
+	pthread_join(smallStatTID, NULL);
+	pthread_join(bigStatTID, NULL);
+
+	
 	return 0;
 }
 
@@ -326,14 +293,12 @@ int main(int argc, char** argv) {
 		nodes[i] = argv[i + optind];
 	}
 
+	/*if (nOfNodes > 0) { // run only if any nodes was inserted
+		float aSize = (int) (aT/(aI/1000))*1.5;
+		if (aSize < 2)
+			aSize = 2;
+		rtts = (float **) malloc(sizeof(float)*aSize*nOfNodes);
 
-	int aT = 10; // argument -t print stat interval (300)[s]
-	int aI = 1000; // argument -i msg send interval (100)[ms]
-
-	float aSize = (int) (at/(ai/1000))*1.5;
-	rtts = (float **) malloc(sizeof(float)*aSize*nOfNodes);
-
-	if (nOfNodes > 0) { // run only if any nodes was inserted
 		int *argT = malloc(sizeof(*argT));
 		if ( argT == NULL ) {
 			fprintf(stderr, "Couldn't allocate memory for thread arg.\n");
@@ -351,14 +316,29 @@ int main(int argc, char** argv) {
 		*argI = aI;
 		pthread_t mClockTID;
 		pthread_create(&mClockTID, NULL, &msgClock, argI);
-	}
+	}*/
 
 	if (udpRcvPort != -1) { // run server if receiving port was specified
 		pthread_t updServTID;
 		pthread_create(&updServTID, NULL, &udpServer, NULL);
 	}
-
-	sleep(1000);
+	int pid[nOfNodes];
+	for (int i = 0; i < nOfNodes; i++) {
+		pid_t pid;
+		//printf("probehne fork\n");
+		pid = fork();
+		if (pid == 0) { // child proces
+			//printf("child process %d\n", i);
+			nodeProcess(i);
+			_Exit(0);
+		} else { // parent proces
+			pids[i] = pid;
+			//printf("parent process %d\n", i);
+		}
+	}
+	for (int i = 0; i < nOfNodes; i++) {
+		waitpid(pids[i], NULL, 0);
+	}
 
 	/*pid_t pid;
 	pid = fork();
