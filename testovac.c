@@ -140,7 +140,7 @@ void udpGetRtt(int nodeI) {
 		exit(1);
 	}
 
-	printf("data sent from %s, port %d (%d) to %s, port %d (%d)\n",inet_ntoa(from.sin_addr), ntohs(from.sin_port), from.sin_port, inet_ntoa(server.sin_addr),ntohs(server.sin_port), server.sin_port);
+	//printf("data sent from %s, port %d (%d) to %s, port %d (%d)\n",inet_ntoa(from.sin_addr), ntohs(from.sin_port), from.sin_port, inet_ntoa(server.sin_addr),ntohs(server.sin_port), server.sin_port);
 
 
 	if ((ok = recv(sock, buffer2, BUFFER_SIZE,0)) == -1) {
@@ -163,7 +163,7 @@ void udpGetRtt(int nodeI) {
 		printf("%s.%02d %d bytes from %s (ip addr) time=%.2f ms\n", ts, (int) t2.tv_usec / 10000, bytesOfData, nodes[nodeI], subTimeval(&t1, &t2));
 
 
-		printf("data received from %s, port %d\n",inet_ntoa(from.sin_addr),ntohs(from.sin_port));
+		//printf("data received from %s, port %d\n",inet_ntoa(from.sin_addr),ntohs(from.sin_port));
 		if (strcmp(buffer, buffer2)) {
 			printf("data se shoduji\n");
 		}
