@@ -193,25 +193,27 @@ int main(int argc, char** argv) {
 	int aT = 10; // argument -t print stat interval (300)
 	int aI = 1000; // argument -i msg send interval (100)
 
-	int *argT = malloc(sizeof(*argT));
-	if ( argT == NULL ) {
-		fprintf(stderr, "Couldn't allocate memory for thread arg.\n");
-		exit(99);
-	}
-	*argT = aT;
-	pthread_t printTID;
-	pthread_create(&printTID, NULL, &printClock, argT);
+	if (nOfNodes > 0) { // run only if any nodes was inserted
+		int *argT = malloc(sizeof(*argT));
+		if ( argT == NULL ) {
+			fprintf(stderr, "Couldn't allocate memory for thread arg.\n");
+			exit(99);
+		}
+		*argT = aT;
+		pthread_t printTID;
+		pthread_create(&printTID, NULL, &printClock, argT);
 
-	int *argI = malloc(sizeof(*argI));
-	if ( argI == NULL ) {
-		fprintf(stderr, "Couldn't allocate memory for thread arg.\n");
-		exit(99);
+		int *argI = malloc(sizeof(*argI));
+		if ( argI == NULL ) {
+			fprintf(stderr, "Couldn't allocate memory for thread arg.\n");
+			exit(99);
+		}
+		*argI = aI;
+		pthread_t mClockTID;
+		pthread_create(&mClockTID, NULL, &msgClock, argI);
 	}
-	*argI = aI;
-	pthread_t mClockTID;
-	pthread_create(&mClockTID, NULL, &msgClock, argI);
 
-	if (udpRcvPort != -1) {
+	if (udpRcvPort != -1) { // run server if receiving port was specified
 		pthread_t updServTID;
 		pthread_create(&updServTID, NULL, &udpServer, NULL);
 	}
