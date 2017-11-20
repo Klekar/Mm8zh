@@ -80,6 +80,14 @@ void udpGetRtt(int nodeI) {
 
 	struct timeval t1, t2;
 	struct timezone tzone;
+	unsigned char buffer[bytesOfData];
+
+	srand(time(NULL));
+	for ( int i = 0; i < bytesOfData; i++) {
+		buffer[i] = rand() % 256;
+		//int r = (rand() % 256) + '0';
+		//printf("%c\n", buffer[i]);
+	}
 
 	(void) gettimeofday(&t1, &tzone); //////////// ZAČÁTEK MĚŘENÍ ČASU
 	/*char temp;
@@ -112,10 +120,10 @@ void udpGetRtt(int nodeI) {
 	printf("data sent from %s, port %d (%d) to %s, port %d (%d)\n",inet_ntoa(from.sin_addr), ntohs(from.sin_port), from.sin_port, inet_ntoa(server.sin_addr),ntohs(server.sin_port), server.sin_port);
 
 
-	if ((i = recv(sock,buffer, BUFFER,0)) == -1) {
+	if ((ok = recv(sock, buffer, BUFFER_SIZE,0)) == -1) {
 		fprintf(stderr, "recv() se nezdarilo\n");
 		exit(1);
-	} else if (i > 0){
+	} else if (ok > 0){
 		(void) gettimeofday(&t2, &tzone);
 		// obtain the remote IP adddress and port from the server (cf. recfrom())
 		if (getpeername(sock, (struct sockaddr *) &from, &fromlen) != 0) {
