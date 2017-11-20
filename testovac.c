@@ -234,7 +234,7 @@ void *udpServer() {
 
 	while (1) {
 		while((msgSize = recvfrom(fd, buffer, BUFFER_SIZE, 0, (struct sockaddr *)&client, &len)) >= 0) {
-			printf("buffer = \"%.*s\"\n",msgSize,buffer);
+			//printf("buffer = \"%.*s\"\n",msgSize,buffer);
 			cliSock = sendto(fd, buffer, msgSize, 0, (struct sockaddr *)&client, len); // send the answer
 			if (cliSock == -1)								// check if data was successfully sent out
 				fprintf(stderr, "sendto() failed\n");
