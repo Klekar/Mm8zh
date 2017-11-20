@@ -1,2 +1,4 @@
+CC=gcc
+
 all: testovac.c
-	gcc -lpthread testovac.c
+	$(CC) -lpthread testovac.c
