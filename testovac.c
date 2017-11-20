@@ -93,7 +93,7 @@ void udpGetRtt(int nodeI) {
 	}*/
 	int timevalSize = sizeof(t1);
 	for ( int i = 0; i < timevalSize; i++) {
-		buffer[i]; = (t1 >> ((timevalSize - 1)*8) ) & 0xFF;
+		buffer[i] = (t1 >> ((timevalSize - 1)*8) ) & 0xFFFFFFFF;
 	}
 	srand(time(NULL));
 	for ( int i = timevalSize; i < bytesOfData; i++) {
