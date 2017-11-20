@@ -363,8 +363,8 @@ int main(int argc, char** argv) {
 		pthread_create(&mClockTID, NULL, &msgClock, argI);
 	}*/
 
+	pthread_t updServTID;
 	if (udpRcvPort != -1) { // run server if receiving port was specified
-		pthread_t updServTID;
 		pthread_create(&updServTID, NULL, &udpServer, NULL);
 	}
 	int pids[nOfNodes];
