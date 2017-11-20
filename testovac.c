@@ -16,7 +16,8 @@
 #include <netdb.h>
 
 
-#define BUFFER	(1024)		 // length of the receiving buffer
+#define QUEUE 1				// queue length for  waiting connections
+#define BUFFER_SIZE	(1024)	// length of the receiving buffer
 
 
 int useUdp = 0;
@@ -119,10 +120,7 @@ void *msgClock(void *arg) {
 	return 0;
 }
 
-void udpServerChild() {
-}
-
-void *udpServerMain() {
+void *udpServer() {
 	int fd;							// an incoming socket descriptor
 	struct sockaddr_in server;		// server's address structure
 	struct sockaddr_in client;		// client's address structure
@@ -139,6 +137,39 @@ void *udpServerMain() {
 	if (bind(fd, (struct sockaddr *)&server, sizeof(server)) == -1)	// binding with the port
 		fprintf(stderr, "Couldn't bind socket.\n");
 
+	if (listen(fd,QUEUE) != 0)		//set a queue for incoming connections
+		fprintf(stderr, "Couldn't setup a queue.\n");
+	printf("Waiting for incoming connections...\n");
+
+	pid_t pid;
+	int len = sizeof(client);
+	int cliSock, msgSize;
+	char buffer[BUFFER_SIZE];
+	while(1) {	// wait for incoming connections (concurrent server)
+		if ((cliSock = accept(fd, (struct sockaddr *)&client, (socklen_t*)&len)) == -1)
+			fprintf(stderr, "Couldn't accept.\n");
+		pid = fork();
+		if ( pid > 0 ) { // parent process
+			close(cliSock);
+		} else if ( pid == 0 ) { // child process
+			close(fd);		// close parent's socket
+			p = (long) getpid();	// current child's PID
+			//while((msgSize = read(cliSock, buffer, BUFFER_SIZE)) > 0) {	// read the message
+			while((msgSize = recvfrom(fd, buffer, BUFFER, 0, (struct sockaddr *)&client, &len)) >= 0) {
+				printf("buffer = \"%.*s\"\n",msgSize,buffer);
+				//i = write(cliSock,buffer,msgSize);    // send a converted message to the client // TCP
+				i = sendto(fd, buffer, msgSize, 0, (struct sockaddr *)&client, len); // send the answer
+				if (i == -1)                           // check if data was successfully sent out
+					fprintf(stderr, "write() failed\n");
+				else if (i != msgSize)
+					fprintf(stderr, "write(): buffer written partially\n");
+			}
+			printf("closing newsock\n");
+			close(cliSock);
+			_Exit(0);
+		} else
+			printf("Couldn't fork()\n");
+	}
 }
 
 /**
