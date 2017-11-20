@@ -50,6 +50,39 @@ void getRtt(int i) {
 		fprintf(stderr, "Při zjišťování informací o zadané adrese došlo k chybě.\n");
 		exit(1);
 	}
+	int isV6, sol, ipErr, ttlFlag;
+    if (servinfo->ai_family == AF_INET) { //IPV4
+        isV6 = IPPROTO_IP;
+        ttlFlag = IP_TTL;
+        sol = SOL_IP;
+        ipErr = IP_RECVERR;
+    } else if (servinfo->ai_family == AF_INET6) { //IPV6
+        isV6 = IPPROTO_IPV6;
+        ttlFlag = IPV6_UNICAST_HOPS;
+        sol = SOL_IPV6;
+        ipErr = IPV6_RECVERR;
+    } else {
+        fprintf(stderr, "Nepodporovaný protokol.\n");
+    }
+    int sock;
+    if ((sock = socket(servinfo->ai_family, servinfo->ai_socktype, servinfo->ai_protocol)) == -1) {
+            fprintf(stderr, "Nepovedlo se vytvořit socket.\n");
+            exit(1);
+    }
+    /*ok = setsockopt(sock,
+                    isV6,
+                    ttlFlag,
+                    &ttl,
+                    sizeof(ttl));
+    if (ok < 0) {
+        fprintf(stderr, "Nešlo nastavit socket.\n");
+        exit(1);
+    }*/
+    ok = connect(sock, servinfo->ai_addr, servinfo->ai_addrlen);
+    if (ok < 0) {
+        fprintf(stderr, "Nešlo se spojit s požadovanou adresou.\n");
+        exit(1);
+    }
 }
 
 void *msgClock(void *arg) {
@@ -81,12 +114,12 @@ void *msgClock(void *arg) {
 }
 
 /**
- * testovac [-h] [-u] [-t <interval>] [-i <interval>] [-p <port>] [-l <port>] [-s <size>] [-r <value>] <uzel1> <uzel2> <uzel3> ...
+ * testovac [-h] [-u] [-v] [-t <interval>] [-i <interval>] [-w <timeout>] [-p <port>] [-l <port>] [-s <size>] [-r <value>] <uzel1> <uzel2> <uzel3> ...
  */
 int main(int argc, char** argv) {
 	//char* node = "google.com";
 	char c;
-	while ((c = getopt (argc, argv, "hut:i:p:l:s:r:")) != -1) {
+	while ((c = getopt (argc, argv, "huvt:i:w:p:l:s:r:")) != -1) {
 		switch(c){
 			case 'h':
 				printHelp();
