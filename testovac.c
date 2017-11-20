@@ -132,7 +132,7 @@ void udpGetRtt(int nodeI) {
 	}
 
 		printf("data received from %s, port %d\n",inet_ntoa(from.sin_addr),ntohs(from.sin_port));
-		printf("%.*s",i,buffer);				// print the answer
+		printf("%.*s",ok,buffer);				// print the answer
 	}
 
 	/*memset(&hints, 0, sizeof hints); ipv4 vs ipv6
