@@ -22,15 +22,17 @@
 
 
 int useUdp = 0;
-int wSec = 2; // arg -w
+float wSec = 2; // arg -w
+float rTime = -1; // arg -r
 int verbose = 0;
-char udpSendPort[6] = "33434";
+char udpSendPort[7] = "33434";
 //char udpRcvPort[6] = "33434";
 int udpRcvPort = -1;
 int nOfNodes;
 char* nodes[30];
 int bytesOfData = 56;
-float rttData[6];
+float rttDataHour[6];
+float rttData[3];
 int aT = 10;	// argument -t print stat interval (300)[s]
 int aI = 1000;	// argument -i msg send interval (100)[ms]
 int nodeI;
@@ -64,92 +66,116 @@ void *udpGetRtt(/*int nodeI*/) {
 	struct sockaddr_in server, from;	// address structures of the server and the client
 	struct hostent *servent;			// network host entry required by gethostbyname()
 	socklen_t len, fromlen;
+	int sock;
+	float rtt = wSec/2;
 
-	memset(&server,0,sizeof(server));	// erase the server structure
-	server.sin_family = AF_INET;  
 
-	if ((servent = gethostbyname(nodes[nodeI])) == NULL) {
-		fprintf(stderr, "Nepovedlo se vytvořit socket.\n");
-		exit(1);
-	}
-	memcpy(&server.sin_addr,servent->h_addr,servent->h_length);
-	server.sin_port = htons(atoi(udpSendPort));	// set up port number
+	while (1) {
+		memset(&server,0,sizeof(server));	// erase the server structure
+		server.sin_family = AF_INET;  
 
-	int sock = socket(AF_INET, SOCK_DGRAM, 0);
-	if (sock == -1) {
-		fprintf(stderr, "Nepovedlo se vytvořit socket.\n");
-		exit(1);
+		if ((servent = gethostbyname(nodes[nodeI])) == NULL) {
+			fprintf(stderr, "Nepovedlo se vytvořit socket.\n");
+			exit(1);
 		}
-	struct timeval timOut; // initialize timeout
-	timOut.tv_sec = 2;
-	timOut.tv_usec = 0;
-	if (setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, (const char*)&timOut,sizeof(struct timeval)) < 0) {
-		printf("Nepodarilo se nastavit socket. (udp send)");
-		_Exit(1);
-	}
+		memcpy(&server.sin_addr,servent->h_addr,servent->h_length);
+		server.sin_port = htons(atoi(udpSendPort));	// set up port number
 
-	len = sizeof(server);
-	fromlen = sizeof(from);
+		sock = socket(AF_INET, SOCK_DGRAM, 0);
+		if (sock == -1) {
+			fprintf(stderr, "Nepovedlo se vytvořit socket.\n");
+			exit(1);
+			}
+		struct timeval timOut; // initialize timeout
+		timOut.tv_sec = (int) rtt*2;
+		timOut.tv_usec = (int) (rtt % 1) * 100000;
+		if (setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, (const char*)&timOut,sizeof(struct timeval)) < 0) {
+			printf("Nepodarilo se nastavit socket. (udp send)");
+			_Exit(1);
+		}
 
-	if (connect(sock, (struct sockaddr *)&server, sizeof(server))  == -1) {
-		fprintf(stderr, "Nepovedlo se vytvořit socket.\n");
-		exit(1);
-	}
+		len = sizeof(server);
+		fromlen = sizeof(from);
 
-	struct timeval t1, t2;
-	struct timezone tzone;
-	unsigned char buffer[bytesOfData]; // sending buffer
-	unsigned char buffer2[bytesOfData]; // receiving buffer
-
-	srand(time(NULL));
-	for ( int i = 0; i < bytesOfData; i++) {
-		buffer[i] = rand() % 256;
-		//int r = (rand() % 256) + '0';
-		//printf("%c\n", buffer[i]);
-	}
-
-	(void) gettimeofday(&t1, &tzone); //////////// ZAČÁTEK MĚŘENÍ ČASU
-
-	int ok = send(sock, buffer, sizeof(buffer), 0);
-	if (ok == -1) {
-		fprintf(stderr, "Nepovedlo se odeslat data.\n");
-		exit(1);
-	} else if (ok != bytesOfData)
-		fprintf(stderr, "Data byla odeslana castecne.\n");
-
-	if (getsockname(sock, (struct sockaddr *) &from, &len) == -1) {
-		fprintf(stderr, "Nepovedlo se zjistit lokální adresu a port.\n");
-		exit(1);
-	}
-
-	//printf("data sent from %s, port %d (%d) to %s, port %d (%d)\n",inet_ntoa(from.sin_addr), ntohs(from.sin_port), from.sin_port, inet_ntoa(server.sin_addr),ntohs(server.sin_port), server.sin_port);
-
-
-	if ((ok = recv(sock, buffer2, BUFFER_SIZE,0)) == -1) {
-		fprintf(stderr, "recv() se nezdarilo\n");
-		exit(1);
-	} else if (ok > 0){
-		(void) gettimeofday(&t2, &tzone); //////////// KONEC MĚŘENÍ ČASU
-
-		if (getpeername(sock, (struct sockaddr *) &from, &fromlen) != 0) {
-			fprintf(stderr, "getpeername() se nezdarilo\n");
+		if (connect(sock, (struct sockaddr *)&server, sizeof(server))  == -1) {
+			fprintf(stderr, "Nepovedlo se vytvořit socket.\n");
 			exit(1);
 		}
 
-		if (verbose) {
-			time_t t = t2.tv_sec;
-			struct tm* lt = localtime(&t);
-			char ts[26];
+		struct timeval t1, t2;
+		struct timezone tzone;
+		unsigned char buffer[bytesOfData]; // sending buffer
+		unsigned char buffer2[bytesOfData]; // receiving buffer
 
-			strftime(ts, 26, "%Y-%m-%d %H:%M:%S", lt);
-
-			printf("%s.%02d %d bytes from %s (ip addr) time=%.2f ms\n", ts, t2.tv_usec % 100, bytesOfData, nodes[nodeI], subTimeval(&t1, &t2));
+		srand(time(NULL));
+		for ( int i = 0; i < bytesOfData; i++) {
+			buffer[i] = rand() % 256;
+			//int r = (rand() % 256) + '0';
+			//printf("%c\n", buffer[i]);
 		}
 
+		(void) gettimeofday(&t1, &tzone); //////////// ZAČÁTEK MĚŘENÍ ČASU
+
+		int ok = send(sock, buffer, sizeof(buffer), 0);
+		if (ok == -1) {
+			fprintf(stderr, "Nepovedlo se odeslat data.\n");
+			exit(1);
+		} else if (ok != bytesOfData)
+			fprintf(stderr, "Data byla odeslana castecne.\n");
+
+		if (getsockname(sock, (struct sockaddr *) &from, &len) == -1) {
+			fprintf(stderr, "Nepovedlo se zjistit lokální adresu a port.\n");
+			exit(1);
+		}
+
+		//printf("data sent from %s, port %d (%d) to %s, port %d (%d)\n",inet_ntoa(from.sin_addr), ntohs(from.sin_port), from.sin_port, inet_ntoa(server.sin_addr),ntohs(server.sin_port), server.sin_port);
+
+
+		if ((ok = recv(sock, buffer2, BUFFER_SIZE,0)) == -1) {
+			rttDataHour[0]++;
+			rttData[0]++;
+			rttDataHour[2]++;
+			rttData[2]++;
+			//fprintf(stderr, "recv() se nezdarilo\n");
+			continue;
+		} else if (ok > 0){
+			(void) gettimeofday(&t2, &tzone); //////////// KONEC MĚŘENÍ ČASU
+
+			if (getpeername(sock, (struct sockaddr *) &from, &fromlen) != 0) {
+				fprintf(stderr, "getpeername() se nezdarilo\n");
+				exit(1);
+			}
+
+			if (!strcmp(buffer, buffer2)) {
+				printf("data se neshoduji\n");
+				continue;
+			}
+
+			rtt = subTimeval(&t1, &t2);
+			rttDataHour[0]++;
+			if (rtt == 0 || rtt < rttDataHour[3])
+				rttDataHour[3] == rtt;
+			if (rtt == 0 || rtt > rttDataHour[4])
+				rttDataHour[4] == rtt;
+			rttDataHour[5] += rtt;
+			rttData[0]++;
+			if (rTime > 0 && rtt > rTime) {
+				rttDataHour[1]++;
+				rttData[1]++;
+			}
+			if (verbose) {
+				time_t t = t2.tv_sec;
+				struct tm* lt = localtime(&t);
+				char ts[26];
+
+				strftime(ts, 26, "%Y-%m-%d %H:%M:%S", lt);
+
+				printf("%s.%02d %d bytes from %s (ip addr) time=%.2f ms\n", ts, t2.tv_usec % 100, bytesOfData, nodes[nodeI], rtt);
+			}
+			usleep(aI * 1000);
+		}
 		//printf("data received from %s, port %d\n",inet_ntoa(from.sin_addr),ntohs(from.sin_port));
-		if (strcmp(buffer, buffer2)) {
-			printf("data se shoduji\n");
-		}
+		
 		//printf("%.*s",ok,buffer2);				// print the answer
 	}
 }
@@ -191,7 +217,16 @@ void *bigStat() {
 }
 
 void nodeProcess(int nOfNode) {
-	//float rttData[6];
+	//float rttDataHour[6];
+	rttDataHour[0] = 0; //pocet clk
+	rttDataHour[1] = 0; //pocet exceed
+	rttDataHour[2] = 0; //pocet lost
+	rttDataHour[3] = 0; //min rtt
+	rttDataHour[4] = 0; //max rtt
+	rttDataHour[5] = 0; //clk rtt
+	rttData[0] = 0; //pocet clk
+	rttData[1] = 0; //pocet exceed
+	rttData[2] = 0; //pocet lost
 	nodeI = nOfNode;
 
 	pthread_t workTID;
@@ -206,9 +241,6 @@ void nodeProcess(int nOfNode) {
 	pthread_join(workTID, NULL);
 	pthread_join(smallStatTID, NULL);
 	pthread_join(bigStatTID, NULL);
-
-	
-	return 0;
 }
 
 void *udpServer() {
@@ -264,6 +296,15 @@ int main(int argc, char** argv) {
 			case 'v':
 				verbose = 1;
 				break;
+			case 't':
+				aT = atoi(optarg);
+				break;
+			case 'i':
+				aI = atoi(optarg);
+				break;
+			case 'w':
+				wSec = atof(optarg);
+				break;
 			case 'p':
 				strcpy(udpSendPort, optarg);
 				break;
@@ -271,17 +312,21 @@ int main(int argc, char** argv) {
 				udpRcvPort = atoi(optarg);
 				break;
 			case 's':
-				if (atoi(optarg) < sizeof(struct timeval)) {
+				/*if (atoi(optarg) < sizeof(struct timeval)) {
 					bytesOfData = sizeof(struct timeval);
 					printf("Moc maly objem dat pro testovani. Pouzije se %dB.", bytesOfData);
 				} else if (atoi(optarg) > BUFFER_SIZE) {
 					bytesOfData = sizeof(struct timeval);
 					printf("Moc velky objem dat pro testovani. Pouzije se %dB.", BUFFER_SIZE);
 				} else
-					bytesOfData = atoi(optarg);
+					bytesOfData = atoi(optarg);*/
+				bytesOfData = atoi(optarg);
+				break;
+			case 'r':
+				rTime = atof(optarg);
 				break;
 			default:
-				fprintf(stderr, "Špatné argumenty.\n");
+				//fprintf(stderr, "Špatné argumenty.\n");
 				break;
 		}
 	}
@@ -322,7 +367,7 @@ int main(int argc, char** argv) {
 		pthread_t updServTID;
 		pthread_create(&updServTID, NULL, &udpServer, NULL);
 	}
-	int pid[nOfNodes];
+	int pids[nOfNodes];
 	for (int i = 0; i < nOfNodes; i++) {
 		pid_t pid;
 		//printf("probehne fork\n");
