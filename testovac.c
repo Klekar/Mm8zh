@@ -71,6 +71,7 @@ void *udpGetRtt(/*int nodeI*/) {
 
 
 	while (1) {
+		usleep(aI * 1000);
 		memset(&server,0,sizeof(server));	// erase the server structure
 		server.sin_family = AF_INET;  
 
@@ -172,7 +173,6 @@ void *udpGetRtt(/*int nodeI*/) {
 
 				printf("%s.%02d %d bytes from %s (ip addr) time=%.2f ms\n", ts, t2.tv_usec % 100, bytesOfData, nodes[nodeI], rtt);
 			}
-			usleep(aI * 1000);
 		}
 		//printf("data received from %s, port %d\n",inet_ntoa(from.sin_addr),ntohs(from.sin_port));
 		
