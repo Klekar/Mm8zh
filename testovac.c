@@ -82,18 +82,24 @@ void udpGetRtt(int nodeI) {
 	struct timezone tzone;
 
 	(void) gettimeofday(&t1, &tzone); //////////// ZAČÁTEK MĚŘENÍ ČASU
+	/*char temp;
+	temp = &t1;*/
 
-	char* buffer;
-	buffer = (char *) malloc(bytesOfData);
-	if (buffer == NULL) {
+	unsigned char buffer[bytesOfData];
+	//buffer = (char *) malloc(bytesOfData);
+	/*if (buffer == NULL) {
 		fprintf(stderr, "Nedostatek místa pro alokaci paměti bufferu. (send udp)\n");
 		exit(1);
+	}*/
+	int timevalSize = sizeof(t1);
+	for ( int i = 0; i < timevalSize; i++) {
+		buffer[i]; = (t1 >> ((timevalSize - 1)*8) ) & 0xFF;
 	}
 	srand(time(NULL));
-	for ( int i = sizeof(struct timeval); i < bytesOfData; i++) {
+	for ( int i = timevalSize; i < bytesOfData; i++) {
 		buffer[i] = rand() % 256;
 		//int r = (rand() % 256) + '0';
-		printf("%c\n", buffer[i]);
+		//printf("%c\n", buffer[i]);
 	}
 
 	send(sock, buffer, sizeof(buffer), 0);
