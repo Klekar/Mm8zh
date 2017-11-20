@@ -56,10 +56,6 @@ void printHelp() {
 	printf("Nápověda.");
 }
 
-void printStats() {
-	printf("stats\n");
-}
-
 void *udpGetRtt(/*int nodeI*/) {
 	printf("%s\n", nodes[nodeI]);
 
@@ -132,8 +128,8 @@ void *udpGetRtt(/*int nodeI*/) {
 		//printf("data sent from %s, port %d (%d) to %s, port %d (%d)\n",inet_ntoa(from.sin_addr), ntohs(from.sin_port), from.sin_port, inet_ntoa(server.sin_addr),ntohs(server.sin_port), server.sin_port);
 
 
-		//if ((ok = recv(sock, buffer2, BUFFER_SIZE,0)) == -1) {
-		if ((ok = recvfrom(sock, buffer2, BUFFER_SIZE,0, (struct sockaddr *)&server, &len)) == -1) {
+		if ((ok = recv(sock, buffer2, BUFFER_SIZE,0)) == -1) {
+		//if ((ok = recvfrom(sock, buffer2, BUFFER_SIZE,0, (struct sockaddr *)&server, &len)) == -1) {
 			rttDataHour[0]++;
 			rttData[0]++;
 			rttDataHour[2]++;
@@ -149,7 +145,7 @@ void *udpGetRtt(/*int nodeI*/) {
 			}
 
 			if (!strcmp(buffer, buffer2)) {
-				printf("data se neshoduji\n");
+				//printf("data se neshoduji\n");
 				continue;
 			}
 
@@ -210,7 +206,24 @@ void *udpGetRtt(/*int nodeI*/) {
 }*/
 
 void *smallStat() {
-	
+	while(1) {
+		sleep(aT);
+		if (rttData[1] == 0 && rttData[2])
+			continue;
+		if (rttData[0] == rttData[2])
+			printf("%s.%02d %s: status down", ts, t.tv_usec % 100, nodes[nodeI]);
+
+
+		struct timeval t = gettimeofday();
+		time_t t = t.tv_sec;
+		struct tm* lt = localtime(&t);
+		char ts[26];
+
+		strftime(ts, 26, "%Y-%m-%d %H:%M:%S", lt);
+
+		printf("%s.%02d %s: %.3f packet loss, %d packet lost, %.3f (%d) packets exceeded RTT threshold %.3fs\n", ts, t.tv_usec % 100, nodes[nodeI], rttData[2]/rttData[0],rttData[2],rttData[1]/rttData[0],rttData[1],rTime);
+
+	}
 }
 
 void *bigStat() {
