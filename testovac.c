@@ -47,8 +47,8 @@ void *printClock(void *arg) {
 	return 0;
 }
 
-void udpGetRtt(int i) {
-	printf("%s\n", nodes[i]);
+void udpGetRtt(int nodeI) {
+	printf("%s\n", nodes[nodeI]);
 
 	struct sockaddr_in server, from;	// address structures of the server and the client
 	struct hostent *servent;			// network host entry required by gethostbyname()
@@ -57,7 +57,7 @@ void udpGetRtt(int i) {
 	memset(&server,0,sizeof(server));	// erase the server structure
 	server.sin_family = AF_INET;  
 
-	if ((servent = gethostbyname(nodes[i])) == NULL) {
+	if ((servent = gethostbyname(nodes[nodeI])) == NULL) {
 		fprintf(stderr, "Nepovedlo se vytvořit socket.\n");
 		exit(1);
 	}
@@ -89,7 +89,11 @@ void udpGetRtt(int i) {
 		fprintf(stderr, "Nedostatek místa pro alokaci paměti bufferu. (send udp)\n");
 		exit(1);
 	}
-
+	srand(time(NULL));
+	for ( int i = sizeof(struct timeval); i < bytesOfData; i++) {
+		char r = rand() % 256;
+		//int r = (rand() % 256) + '0';
+	}
 
 	send(sock, buffer, bytesOfData, 0);
 
