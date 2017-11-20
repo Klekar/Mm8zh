@@ -132,7 +132,8 @@ void *udpGetRtt(/*int nodeI*/) {
 		//printf("data sent from %s, port %d (%d) to %s, port %d (%d)\n",inet_ntoa(from.sin_addr), ntohs(from.sin_port), from.sin_port, inet_ntoa(server.sin_addr),ntohs(server.sin_port), server.sin_port);
 
 
-		if ((ok = recv(sock, buffer2, BUFFER_SIZE,0)) == -1) {
+		//if ((ok = recv(sock, buffer2, BUFFER_SIZE,0)) == -1) {
+		if ((ok = recvfrom(sock, buffer2, BUFFER_SIZE,0, server, len)) == -1) {
 			rttDataHour[0]++;
 			rttData[0]++;
 			rttDataHour[2]++;
