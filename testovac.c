@@ -158,7 +158,7 @@ void udpGetRtt(int nodeI) {
 		struct tm* lt = localtime(&t);
 		char ts[26];
 
-		strftime(ts, 26, "%Y-%m-%d %H:%M:%S", nt);
+		strftime(ts, 26, "%Y-%m-%d %H:%M:%S", tm);
 
 		printf("%s.%02d %d bytes from %s (ip addr) time=%.2f ms\n", ts, t2.tv_usec % 1000, bytesOfData, nodes[nodeI], subTimeval(&t1, &t2));
 
