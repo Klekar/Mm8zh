@@ -78,8 +78,8 @@ void getRtt(int i) {
         fprintf(stderr, "Nešlo nastavit socket.\n");
         exit(1);
     }*/
-    ok = connect(sock, nodeInfo->ai_addr, nodeInfo->ai_addrlen);
-    if (ok < 0) {
+    //ok = connect(sock, nodeInfo->ai_addr, nodeInfo->ai_addrlen);
+    if (connect(sock, nodeInfo->ai_addr, nodeInfo->ai_addrlen) < 0) {
         fprintf(stderr, "Nešlo se spojit s požadovanou adresou.\n");
         exit(1);
     }
